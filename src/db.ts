@@ -2,24 +2,36 @@ import { Sequelize } from 'sequelize';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 
-export const sequelize = new Sequelize(
-  process.env.DB_NAME ?? 'default',
-  process.env.DB_USER ?? 'default',
-  process.env.DB_PASSWORD ?? 'default',
-  {
-    host: process.env.DB_HOST ?? 'default',
+export let sequelize = new Sequelize({dialect: 'postgres'});
+
+if (process.env.DATABASE_URL) { // for heroku only
+  sequelize = new Sequelize(process.env.DATABASE_URL ?? '', {
     dialect: 'postgres',
-  }
-);
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+    logging: false,
+  });
+}
+else {
+  sequelize = new Sequelize(process.env.DB_NAME ?? 'default', process.env.DB_USER ?? 'default', process.env.DB_PASSWORD ?? 'default', {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+    dialect: 'postgres',
+    logging: false,
+  });
+  
+}
 
 const db: any = {};
 
 async function initializeModels() {
   const modelsDir = join(__dirname, 'models');
   const modelFiles = readdirSync(modelsDir).filter(file => file.endsWith('.js') || file.endsWith('.ts'));
-  console.log(modelFiles);
   for (const file of modelFiles) {
-    console.log(file);
     const modelImport = require(join(modelsDir, file));
     const modelName = file.replace(/\.js$|\.ts$/, '');
     db[modelName] = modelImport(sequelize);
