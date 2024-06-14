@@ -16,6 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /app .
 
-CMD ["node", "./dist/app.js"]
-
 EXPOSE 3000
+
+CMD ["node", "./dist/app.js"]
