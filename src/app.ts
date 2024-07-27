@@ -36,6 +36,7 @@ app.get('/users', userController.getAllUsers);
 app.post('/users', userController.createUser);
 app.put('/users/:id', userController.updateUser);
 app.delete('/users/:id', userController.deleteUser);
+app.post('/users/login', userController.login);
 
 app.use((err: any, req: any, res: any, next: any) => {
     console.error('Error:', err);

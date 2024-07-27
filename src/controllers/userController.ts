@@ -67,3 +67,21 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+// Login user
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const user = await db.user.findOne({ where: { email: email, password: password } });
+
+    if (user) {
+      res.json(user);
+    }
+    else {
+      res.json(false);
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
